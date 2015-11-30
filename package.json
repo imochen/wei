@@ -2,9 +2,11 @@
   "name": "wei",
   "version": "1.0.1",
   "description": "weixin login & weixin sign",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "babel --loose all --modules common src/ -d --out-dir lib/",
+    "prepublish": "npm run compile"
   },
   "repository": {
     "type": "git",
@@ -25,5 +27,12 @@
   "bugs": {
     "url": "https://github.com/imochen/wei/issues"
   },
-  "homepage": "https://github.com/imochen/wei"
+  "homepage": "https://github.com/imochen/wei",
+  "dependencies": {
+    "jssha": "^1.6.0",
+    "urllib": "^2.5.0"
+  },
+  "devDependencies": {
+    "babel": "^5.8.21"
+  }
 }
