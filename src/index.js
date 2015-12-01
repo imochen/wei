@@ -1,6 +1,6 @@
-import login from './login';
+import authorize from './authorize';
 import signature from './signature';
 
-login({},{});
+authorize({},{});
 
-export { login , signature };
+export { authorize , signature };
