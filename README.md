@@ -1,6 +1,6 @@
 # wei
 
-> 用于微信签名和微信登陆的一个node模块
+> 用于微信签名和微信登陆的一个node模块，该模块推荐配合 `ea7 async/await`使用，最初开发为在`thinkjs2.0`中使用，如在其他平台使用出现bug，可与本人取得联系。
 
 ### 安装
 ```javascript
@@ -38,4 +38,28 @@ var sign = wei.sign( jsapi_ticket , url );
 	url: url, //签名的url地址
 	signature : signature //签名结果
 }
+```
+
+### wei.authorize_url(  appid  , redirect_uri )
+方法为静态方法，返回一个url，业务需要跳转至该url进行授权。示例
+```javascript
+var authorize_url = wei.authorize_url( appid ,redirect_uri );
+
+http.redirect( authorize_url );
+```
+
+### wei.authorize(  config  , hooks )
+使用该方法会进行一系列认证，直到拿到用户信息。因为openid是唯一的，所以在第一步请求拿到`access_token`后，会有一个`hook`。可以用该`hook`执行查库等逻辑，如果查到则给方法返回信息即可。未查到可不返回。或者返回空。使用示例。方法返回promise。
+```javascript
+
+wei.authorize({
+	appid : appid,
+	appsecret : appsecret,
+	code : code //此处code可在授权后重定向的url上拿到。
+},{
+	check : function(){
+		return ''; //此处可返回userinfo，如未查到则返回空。
+	}
+})
+
 ```

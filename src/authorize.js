@@ -1,5 +1,4 @@
 import { get , post } from './utils/request';
-import http from 'http';
 
 
 let urls = {
@@ -24,65 +23,84 @@ let utils = {
 
 }
 
-export default {
+let authorize_url = ( appid , redirect_uri ) =>{
+	return 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ appid +'&redirect_uri='+ encodeURIComponent(redirect_uri) +'&response_type=code&scope=snsapi_userinfo#wechat_redirect'
+}
 
-	authorize_url( appid , redirect_uri ){
-		return utils.serialize( urls.authorize , {
-			appid : appid,
-			response_type : 'code',
-			scope : 'snsapi_userinfo',
-			state : 'auth',
-			'#wechat_redirect' : ''
-		});
-	},
+let run = async ( config , hooks ) =>{
 
-	async run( config , hooks ){
+	let appid = config.appid;
+	let appsecret = config.appsecret;
+	let code = config.code;
 
-		let appid = config.appid;
-		let appsecret = config.appsecret;
-		let code = config.code;
+	hooks = hooks || {}; //容错
 
-		let access_token_data = await get( urls.access_token , {
+	let access_token_data;
+
+	try{
+		access_token_data = await get( urls.access_token , {
 			appid : appid,
 			secret : appsecret,
 			code : code,
 			grant_type : 'authorization_code'
 		});
+	}catch(e){
+		console.log(e);
+	}
 
-		if( !access_token_data.access_token ){
-			hooks.retry();
-			return false;
-		}
+	if( !access_token_data.access_token ){
+		return {
+			errno : -1,
+			errmsg : 'get access_token filed'
+		};
+	}
 
-		let userinfo = await hooks.check( access_token_data );
+	let userinfo;
 
-		if( !userinfo ){
-			
-			let access_token = access_token_data.access_token;
-			let openid = access_token_data.openid;
+	if( hooks.check ){
+		userinfo = await hooks.check( access_token_data );
+	}
 
-			let check_token_data = await get( urls.check_token , {
+	if( !userinfo ){
+		
+		let access_token = access_token_data.access_token;
+		let openid = access_token_data.openid;
+
+		let check_token_data;
+		try{
+			check_token_data = await get( urls.check_token , {
 				openid : openid,
 				access_token : access_token
 			});
+		}catch(e){
+			console.log(e);
+		}
 
-			if( check_token_data.errcode !== 0 ){
-				let refresh_token_data = await get( urls.refresh_token ,{
+		if( check_token_data.errcode !== 0 ){
+			let refresh_token_data;
+			try{
+				refresh_token_data = await get( urls.refresh_token ,{
 					appid : appid,
 					refresh_token : access_token_data.refresh_token
 				});
-				access_token = refresh_token_data.access_token;
+			}catch(e){
+				console.log(e);
 			}
+			access_token = refresh_token_data.access_token;
+		}
 
-			let userinfo = await get( urls.user_info , {
+		try{
+			userinfo = await get( urls.user_info , {
 				openid : openid,
 				access_token : access_token
 			});
-
-			hooks.save( userinfo );
-
-			return userinfo;
+		}catch(e){
+			console.log(e);
 		}
+
 	}
 
+	return userinfo;
 }
+
+export default { authorize_url , run };
