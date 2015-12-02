@@ -1,6 +1,9 @@
 import authorize from './authorize';
 import signature from './signature';
 
-authorize({},{});
 
-export { authorize , signature };
+
+export default {
+	sign : signature.sign,
+	token : signature.token
+}
