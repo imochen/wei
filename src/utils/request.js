@@ -1,6 +1,7 @@
 import urllib from 'urllib';
 
 let _request = ( type , url , data , options ) => {
+	options = options || {};
 	return new Promise((resolve , reject)=>{
 		urllib.request( url , {
 			method : type,
