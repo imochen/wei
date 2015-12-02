@@ -83,6 +83,7 @@ let token = async ( appid , appsecret ) => {
 		}
 	}
 	catch(e){
+		console.log(e);
 		return {
 			errno : -1,
 			errmsg : 'get token or ticket failed'
