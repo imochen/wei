@@ -5,7 +5,7 @@ let _request = ( type , url , data , options ) => {
 	return new Promise((resolve , reject)=>{
 		urllib.request( url , {
 			method : type,
-			timeout : options.timeout || 10000,
+			timeout : options.timeout || 60000,
 			data : data
 		},( err , data , res )=>{
 			if( !err ){
